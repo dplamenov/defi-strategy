@@ -5,7 +5,7 @@ const GOERLI_PRIVATE_KEY = "c8efccf7330e2f2a19c5a296ac551d757985512894ed2d3bdb44
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
-  solidity: "0.8.9",
+  solidity: "0.8.10",
   defaultNetwork: "goerli",
   networks: {
     goerli: {
