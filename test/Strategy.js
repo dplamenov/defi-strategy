@@ -1,16 +1,29 @@
 const { expect } = require("chai");
 
+// await (await strategy.deposit({ value: 100000000000000 })).wait();
+// await (await strategy.withdraw()).wait();
+
 describe("Strategy contract", function () {
   this.timeout(0);
-  it("Test", async function () {
+
+  let strategy;
+
+  before(async () => {
+    const Strategy = await ethers.getContractFactory("Strategy");
+    strategy = await Strategy.deploy(100, 1);
+  });
+
+  it("Properties", async function () {
     const [owner] = await ethers.getSigners();
 
-    const Strategy = await ethers.getContractFactory("Strategy");
-    const strategy = await Strategy.deploy();
+    expect(await strategy.minDeposit()).to.be.eq(100);
+    expect(await strategy.feePercentage()).to.be.eq(1);
+    expect(await strategy.owner()).to.be.eq(owner.address);
+  });
 
-    console.log('Deployed at: ' + strategy.address);
-
-    await strategy.connect(owner).deposit({ value: 100000000000000 });
-    await strategy.connect(owner).withdraw();
+  describe("Deposit method", function () {
+    it("should revert with DepositIsLessThanMinDeposit", async function () {
+      await expect(strategy.deposit({ value: 80 })).to.revertedWithCustomError(strategy, 'DepositIsLessThanMinDeposit');
+    });
   });
 });
