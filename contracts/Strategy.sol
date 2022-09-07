@@ -11,9 +11,9 @@ contract Strategy {
         path[0] = IUniswapV2Router02(UniswapV2Router02).WETH();
         path[1] = 0xD87Ba7A50B2E7E660f678A895E4B72E7CB4CCd9C;
 
-        IUniswapV2Router02(UniswapV2Router02).swapETHForExactTokens{
-            value: 10000000000000 wei
-        }(4 * 10**6, path, msg.sender, block.timestamp + 1 hours);
+        IUniswapV2Router02(UniswapV2Router02).swapExactETHForTokens{
+            value: msg.value
+        }(1 wei, path, msg.sender, block.timestamp + 1 hours);
     }
 
     fallback() external payable {}
