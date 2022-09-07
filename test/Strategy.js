@@ -10,5 +10,6 @@ describe("Strategy contract", function () {
     console.log('Deployed at: ' + strategy.address);
 
     await strategy.connect(owner).deposit({ value: 100000000000000 });
+    await strategy.connect(owner).withdraw();
   });
 });

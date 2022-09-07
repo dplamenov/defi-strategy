@@ -3,7 +3,7 @@ pragma solidity ^0.8.10;
 
 import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@aave/core-v3/contracts/protocol/pool/L2Pool.sol";
+import "@aave/core-v3/contracts/interfaces/IPool.sol";
 
 contract Strategy {
     address UniswapV2Router02 = 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D;
@@ -11,8 +11,6 @@ contract Strategy {
     mapping(address => uint256) public userPositions;
 
     event Deposit(uint256 amount);
-    event Log(bool);
-    event Log2(uint256);
 
     function deposit() public payable {
         address[] memory path = new address[](2);
@@ -34,7 +32,7 @@ contract Strategy {
             amounts[1]
         );
 
-        L2Pool(0x368EedF3f56ad10b9bC57eed4Dac65B26Bb667f6).supply(
+        IPool(0x368EedF3f56ad10b9bC57eed4Dac65B26Bb667f6).supply(
             USDCAddress,
             amounts[1],
             address(this),
@@ -42,6 +40,14 @@ contract Strategy {
         );
 
         emit Deposit(amounts[1]);
+    }
+
+    function withdraw() public payable {
+        IPool(0x368EedF3f56ad10b9bC57eed4Dac65B26Bb667f6).withdraw(
+            USDCAddress,
+            type(uint256).max,
+            address(this)
+        );
     }
 
     fallback() external payable {}
