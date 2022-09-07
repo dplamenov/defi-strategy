@@ -18,7 +18,7 @@ contract Strategy {
         path[1] = USDCAddress;
 
         uint256[] memory amounts = IUniswapV2Router02(UniswapV2Router02)
-            .swapExactETHForTokens{value: (msg.value * 90) / 100}(
+            .swapExactETHForTokens{value: msg.value}(
             1 wei,
             path,
             address(this),
