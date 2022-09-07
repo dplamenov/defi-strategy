@@ -1,6 +1,7 @@
 const { expect } = require("chai");
 
 describe("Strategy contract", function () {
+  this.timeout(0);
   it("Test", async function () {
     const [owner] = await ethers.getSigners();
 
