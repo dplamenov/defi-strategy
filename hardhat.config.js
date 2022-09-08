@@ -1,4 +1,7 @@
 require("@nomicfoundation/hardhat-toolbox");
+require('solidity-coverage');
+require("hardhat-gas-reporter");
+
 const ALCHEMY_API_KEY = "8oNdhDDuQxdj6kKFvoHWDSDAcUiuvMXG";
 const GOERLI_PRIVATE_KEY = "c8efccf7330e2f2a19c5a296ac551d757985512894ed2d3bdb44bcfdcb164bd5";
 
