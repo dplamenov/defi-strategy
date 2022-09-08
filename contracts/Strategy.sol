@@ -166,7 +166,7 @@ contract Strategy is ReentrancyGuard {
         emergency = false;
     }
 
-    function estimate() public view returns (uint256) {
+    function estimateWithdraw() public view returns (uint256) {
         uint256 percentage = (userPositions[msg.sender] * 100) /
             totalUSDCTokens;
         (, , uint256 availableBorrowsBase, , , ) = IPool(AAVEPool)
