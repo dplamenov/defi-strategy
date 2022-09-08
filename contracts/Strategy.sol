@@ -24,14 +24,19 @@ contract Strategy {
 
     mapping(address => uint256) public userPositions;
 
+    /// @notice emit ot deposit
     event Deposit(uint256 amount);
+
+    /// @notice emit ot withdraw
     event Withdraw(uint256 amount);
 
+    /// @notice emergency must be false to pass check
     modifier notInEmergency() {
         if (emergency == true) revert InEmergency();
         _;
     }
 
+    /// @notice msg.sender must be equal to owner to pass check
     modifier onlyOwner() {
         if (msg.sender != owner) revert NotAdmin();
         _;
