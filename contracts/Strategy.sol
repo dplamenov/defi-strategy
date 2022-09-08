@@ -77,6 +77,12 @@ contract Strategy {
         emit Deposit(amounts[1]);
     }
 
+    /// @notice withdraw -> User can withdraw ETH; can revert with InsufficientBalance();
+    /// @param tokens How many tokens to withdraw;
+    /// @param minEth Min value of returned ETH;
+    /// @dev 1. First withdraw tokens from AAVE Pool
+    /// @dev 2. Then swap tokens for ETH using UNISWAP
+    /// @dev 3. Pay fee
     function withdraw(uint256 tokens, uint256 minEth) public payable {
         address[] memory path = new address[](2);
         path[0] = USDCAddress;
@@ -119,10 +125,12 @@ contract Strategy {
         return userPositions[msg.sender];
     }
 
+    /// @notice Owner can set protocol in emergency mode
     function startEmergency() public onlyOwner {
         emergency = true;
     }
 
+    /// @notice Owner can set protocol in emergency mode
     function endEmergency() public onlyOwner {
         emergency = false;
     }
