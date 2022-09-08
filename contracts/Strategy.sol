@@ -130,5 +130,21 @@ contract Strategy {
         emergency = false;
     }
 
+    function estimate() public view returns (uint256) {
+        uint256 percentage = (userPositions[msg.sender] * 100) /
+            totalUSDCTokens;
+        (, , uint256 availableBorrowsBase, , , ) = IPool(AAVEPool)
+            .getUserAccountData(address(this));
+
+        address[] memory path = new address[](2);
+        path[0] = USDCAddress;
+        path[1] = weth;
+
+        uint256[] memory amounts = IUniswapV2Router02(UniswapV2Router02)
+            .getAmountsOut((availableBorrowsBase * percentage) / 100, path);
+
+        return ((amounts[1] * (100 - feePercentage)) / 100);
+    }
+
     fallback() external payable {}
 }
