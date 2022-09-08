@@ -3,6 +3,7 @@ pragma solidity ^0.8.10;
 
 import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@aave/core-v3/contracts/interfaces/IPool.sol";
 
 error DepositIsLessThanMinDeposit();
@@ -10,7 +11,7 @@ error InsufficientBalance();
 error InEmergency();
 error NotAdmin();
 
-contract Strategy {
+contract Strategy is ReentrancyGuard {
     address UniswapV2Router02 = 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D;
     address USDCAddress = 0xA2025B15a1757311bfD68cb14eaeFCc237AF5b43;
     address AAVEPool = 0x368EedF3f56ad10b9bC57eed4Dac65B26Bb667f6;
@@ -88,7 +89,11 @@ contract Strategy {
     /// @dev 1. First withdraw tokens from AAVE Pool
     /// @dev 2. Then swap tokens for ETH using UNISWAP
     /// @dev 3. Pay fee
-    function withdraw(uint256 tokens, uint256 minEth) public payable {
+    function withdraw(uint256 tokens, uint256 minEth)
+        public
+        payable
+        nonReentrant
+    {
         if (userPositions[msg.sender] < tokens) revert InsufficientBalance();
 
         address[] memory path = new address[](2);
