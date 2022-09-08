@@ -7,6 +7,8 @@ import "@aave/core-v3/contracts/interfaces/IPool.sol";
 
 error DepositIsLessThanMinDeposit();
 error InsufficientBalance();
+error InEmergency();
+error NotAdmin();
 
 contract Strategy {
     address UniswapV2Router02 = 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D;
@@ -17,10 +19,22 @@ contract Strategy {
     uint256 public minDeposit;
     uint256 public feePercentage;
 
+    bool emergency = false;
+
     mapping(address => uint256) public userPositions;
 
     event Deposit(uint256 amount);
     event Withdraw(uint256 amount);
+
+    modifier notInEmergency() {
+        if (emergency == true) revert InEmergency();
+        _;
+    }
+
+    modifier onlyOwner() {
+        if (msg.sender != owner) revert NotAdmin();
+        _;
+    }
 
     constructor(uint256 _minDeposit, uint256 _feePercentage) {
         weth = IUniswapV2Router02(UniswapV2Router02).WETH();
@@ -44,7 +58,7 @@ contract Strategy {
             block.timestamp + 1 hours
         );
 
-        userPositions[msg.sender] = amounts[1];
+        userPositions[msg.sender] += amounts[1];
 
         IERC20(USDCAddress).approve(AAVEPool, amounts[1]);
 
@@ -92,6 +106,14 @@ contract Strategy {
 
     function getUDSC() public view returns (uint256) {
         return userPositions[msg.sender];
+    }
+
+    function startEmergency() public onlyOwner {
+        emergency = true;
+    }
+
+    function endEmergency() public onlyOwner {
+        emergency = false;
     }
 
     fallback() external payable {}
