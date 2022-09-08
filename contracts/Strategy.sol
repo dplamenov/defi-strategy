@@ -10,6 +10,7 @@ error DepositIsLessThanMinDeposit();
 error InsufficientBalance();
 error InEmergency();
 error NotAdmin();
+error TransferFailed();
 
 contract Strategy is ReentrancyGuard {
     address UniswapV2Router02 = 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D;
@@ -73,14 +74,36 @@ contract Strategy is ReentrancyGuard {
             block.timestamp + 1 hours
         );
 
-        userPositions[msg.sender] += amounts[1];
-        totalUSDCTokens += amounts[1];
+        _deposit(amounts[1]);
+    }
 
-        IERC20(USDCAddress).approve(AAVEPool, amounts[1]);
+    /// @notice depositWETH -> User can deposit WETH; Before that must be call approve method.
+    /// @param wethTokens amount of tokens
+    function depositWETH(uint256 wethTokens) public payable notInEmergency {
+        if (wethTokens < minDeposit) revert DepositIsLessThanMinDeposit();
 
-        IPool(AAVEPool).supply(USDCAddress, amounts[1], address(this), 0);
+        bool sent = IERC20(weth).transferFrom(
+            msg.sender,
+            address(this),
+            wethTokens
+        );
 
-        emit Deposit(amounts[1]);
+        if (!sent) revert TransferFailed();
+
+        address[] memory path = new address[](2);
+        path[0] = weth;
+        path[1] = USDCAddress;
+
+        uint256[] memory amounts = IUniswapV2Router02(UniswapV2Router02)
+            .swapExactTokensForETH(
+                wethTokens,
+                1 wei,
+                path,
+                address(this),
+                block.timestamp + 1 hours
+            );
+
+        _deposit(amounts[1]);
     }
 
     /// @notice withdraw -> User can withdraw ETH; can revert with InsufficientBalance();
@@ -114,16 +137,19 @@ contract Strategy is ReentrancyGuard {
         uint256[] memory amounts = IUniswapV2Router02(UniswapV2Router02)
             .swapExactTokensForETH(
                 tokens,
-                0,
+                minEth,
                 path,
                 address(this),
                 block.timestamp + 1 hours
             );
 
-        payable(owner).transfer((tokens * feePercentage) / 100);
-        payable(msg.sender).transfer((tokens * (100 - feePercentage)) / 100);
+        uint256 fee = (amounts[1] * feePercentage) / 100;
+        uint256 withdrawAmount = amounts[1] - fee;
 
-        emit Withdraw(amounts[1]);
+        payable(owner).transfer(fee);
+        payable(msg.sender).transfer(withdrawAmount);
+
+        emit Withdraw(withdrawAmount);
     }
 
     function getUDSC() public view returns (uint256) {
@@ -154,6 +180,17 @@ contract Strategy is ReentrancyGuard {
             .getAmountsOut((availableBorrowsBase * percentage) / 100, path);
 
         return ((amounts[1] * (100 - feePercentage)) / 100);
+    }
+
+    function _deposit(uint256 amount) private {
+        userPositions[msg.sender] += amount;
+        totalUSDCTokens += amount;
+
+        IERC20(USDCAddress).approve(AAVEPool, amount);
+
+        IPool(AAVEPool).supply(USDCAddress, amount, address(this), 0);
+
+        emit Deposit(amount);
     }
 
     fallback() external payable {}
