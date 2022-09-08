@@ -101,22 +101,17 @@ contract Strategy {
 
         IERC20(USDCAddress).approve(UniswapV2Router02, tokens);
 
-        IUniswapV2Router02(UniswapV2Router02).swapExactTokensForETH(
-            (tokens * feePercentage) / 100,
-            0,
-            path,
-            owner,
-            block.timestamp + 1 hours
-        );
-
         uint256[] memory amounts = IUniswapV2Router02(UniswapV2Router02)
             .swapExactTokensForETH(
-                (tokens * (100 - feePercentage)) / 100,
-                minEth,
+                tokens,
+                0,
                 path,
-                msg.sender,
+                address(this),
                 block.timestamp + 1 hours
             );
+
+        payable(owner).transfer((tokens * feePercentage) / 100);
+        payable(msg.sender).transfer((tokens * (100 - feePercentage)) / 100);
 
         emit Withdraw(amounts[1]);
     }
