@@ -37,6 +37,11 @@ contract Strategy {
         _;
     }
 
+    /// @notice construct contract
+    /// @param _minDeposit Min value of deposit
+    /// @param _feePercentage Fercentage of fee for the current protocol at withdraw
+    /// @dev 1. get address of WETH
+    /// @dev 2. set address of deployer to owner
     constructor(uint256 _minDeposit, uint256 _feePercentage) {
         weth = IUniswapV2Router02(UniswapV2Router02).WETH();
         minDeposit = _minDeposit;
