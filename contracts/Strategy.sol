@@ -49,6 +49,9 @@ contract Strategy {
         owner = msg.sender;
     }
 
+    /// @notice deposit -> User can deposit ETH; Deposit should be more than minDeposit; Avaible only in normal mode(notInEmergency)
+    /// @dev 1. Deposited ETH by user is swapped at UNISWAP for USDC after that we supply AAVE pool with that USDC.
+    /// @dev 2. emit Deposit event
     function deposit() public payable notInEmergency {
         if (msg.value < minDeposit) revert DepositIsLessThanMinDeposit();
 
