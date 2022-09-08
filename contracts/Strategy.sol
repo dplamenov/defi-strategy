@@ -18,6 +18,7 @@ contract Strategy {
     address public owner;
     uint256 public minDeposit;
     uint256 public feePercentage;
+    uint256 public totalUSDCTokens;
 
     bool emergency = false;
 
@@ -43,7 +44,7 @@ contract Strategy {
         owner = msg.sender;
     }
 
-    function deposit() public payable {
+    function deposit() public payable notInEmergency {
         if (msg.value < minDeposit) revert DepositIsLessThanMinDeposit();
 
         address[] memory path = new address[](2);
@@ -59,6 +60,7 @@ contract Strategy {
         );
 
         userPositions[msg.sender] += amounts[1];
+        totalUSDCTokens += amounts[1];
 
         IERC20(USDCAddress).approve(AAVEPool, amounts[1]);
 
@@ -75,6 +77,7 @@ contract Strategy {
         if (userPositions[msg.sender] < tokens) revert InsufficientBalance();
 
         userPositions[msg.sender] -= tokens;
+        totalUSDCTokens -= tokens;
 
         uint256 tokens = IPool(AAVEPool).withdraw(
             USDCAddress,
