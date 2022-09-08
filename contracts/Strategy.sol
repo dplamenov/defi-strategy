@@ -84,11 +84,11 @@ contract Strategy {
     /// @dev 2. Then swap tokens for ETH using UNISWAP
     /// @dev 3. Pay fee
     function withdraw(uint256 tokens, uint256 minEth) public payable {
+        if (userPositions[msg.sender] < tokens) revert InsufficientBalance();
+
         address[] memory path = new address[](2);
         path[0] = USDCAddress;
         path[1] = weth;
-
-        if (userPositions[msg.sender] < tokens) revert InsufficientBalance();
 
         userPositions[msg.sender] -= tokens;
         totalUSDCTokens -= tokens;
