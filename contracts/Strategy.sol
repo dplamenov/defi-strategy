@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@aave/core-v3/contracts/interfaces/IPool.sol";
 
 error DepositIsLessThanMinDeposit();
+error InsufficientBalance();
 
 contract Strategy {
     address UniswapV2Router02 = 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D;
@@ -52,14 +53,18 @@ contract Strategy {
         emit Deposit(amounts[1]);
     }
 
-    function withdraw() public payable {
+    function withdraw(uint256 tokens, uint256 minEth) public payable {
         address[] memory path = new address[](2);
         path[0] = USDCAddress;
         path[1] = weth;
 
+        if (userPositions[msg.sender] < tokens) revert InsufficientBalance();
+
+        userPositions[msg.sender] -= tokens;
+
         uint256 tokens = IPool(AAVEPool).withdraw(
             USDCAddress,
-            type(uint256).max,
+            tokens,
             address(this)
         );
 
@@ -67,7 +72,7 @@ contract Strategy {
 
         IUniswapV2Router02(UniswapV2Router02).swapExactTokensForETH(
             (tokens * feePercentage) / 100,
-            1 wei,
+            0,
             path,
             owner,
             block.timestamp + 1 hours
@@ -76,13 +81,17 @@ contract Strategy {
         uint256[] memory amounts = IUniswapV2Router02(UniswapV2Router02)
             .swapExactTokensForETH(
                 (tokens * (100 - feePercentage)) / 100,
-                1 wei,
+                minEth,
                 path,
                 msg.sender,
                 block.timestamp + 1 hours
             );
 
         emit Withdraw(amounts[1]);
+    }
+
+    function getUDSC() public view returns (uint256) {
+        return userPositions[msg.sender];
     }
 
     fallback() external payable {}
