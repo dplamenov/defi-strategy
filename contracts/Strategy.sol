@@ -41,8 +41,8 @@ contract Strategy is ReentrancyGuard {
         _;
     }
 
-    /// @notice msg.sender must be equal to owner to pass check
-    modifier onlyOwner() {
+    /// @notice msg.sender must be equal to admin to pass check
+    modifier onlyAdmin() {
         if (msg.sender != owner) revert NotAdmin();
         _;
     }
@@ -120,6 +120,64 @@ contract Strategy is ReentrancyGuard {
         payable
         nonReentrant
     {
+        _withdraw(tokens, minEth, msg.sender);
+    }
+
+    // @notice withdrawAndTransfer -> Add option to transfer ETH to another address in same transcation
+    function withdrawAndTransfer(
+        uint256 tokens,
+        uint256 minEth,
+        address to
+    ) public payable nonReentrant {
+        _withdraw(tokens, minEth, to);
+    }
+
+    function getUDSC() public view returns (uint256) {
+        return userPositions[msg.sender];
+    }
+
+    /// @notice Owner can set protocol in emergency mode
+    function startEmergency() public onlyAdmin {
+        emergency = true;
+    }
+
+    /// @notice Owner can set protocol in emergency mode
+    function endEmergency() public onlyAdmin {
+        emergency = false;
+    }
+
+    function estimateWithdraw() public view returns (uint256) {
+        uint256 percentage = (userPositions[msg.sender] * 100) /
+            totalUSDCTokens;
+        (, , uint256 availableBorrowsBase, , , ) = IPool(AAVEPool)
+            .getUserAccountData(address(this));
+
+        address[] memory path = new address[](2);
+        path[0] = USDCAddress;
+        path[1] = weth;
+
+        uint256[] memory amounts = IUniswapV2Router02(UniswapV2Router02)
+            .getAmountsOut((availableBorrowsBase * percentage) / 100, path);
+
+        return ((amounts[1] * (100 - feePercentage)) / 100);
+    }
+
+    function _deposit(uint256 amount) private {
+        userPositions[msg.sender] += amount;
+        totalUSDCTokens += amount;
+
+        IERC20(USDCAddress).approve(AAVEPool, amount);
+
+        IPool(AAVEPool).supply(USDCAddress, amount, address(this), 0);
+
+        emit Deposit(amount);
+    }
+
+    function _withdraw(
+        uint256 tokens,
+        uint256 minEth,
+        address to
+    ) private {
         if (userPositions[msg.sender] < tokens) revert InsufficientBalance();
 
         address[] memory path = new address[](2);
@@ -150,50 +208,9 @@ contract Strategy is ReentrancyGuard {
         uint256 withdrawAmount = amounts[1] - fee;
 
         payable(owner).transfer(fee);
-        payable(msg.sender).transfer(withdrawAmount);
+        payable(to).transfer(withdrawAmount);
 
         emit Withdraw(withdrawAmount);
-    }
-
-    function getUDSC() public view returns (uint256) {
-        return userPositions[msg.sender];
-    }
-
-    /// @notice Owner can set protocol in emergency mode
-    function startEmergency() public onlyOwner {
-        emergency = true;
-    }
-
-    /// @notice Owner can set protocol in emergency mode
-    function endEmergency() public onlyOwner {
-        emergency = false;
-    }
-
-    function estimateWithdraw() public view returns (uint256) {
-        uint256 percentage = (userPositions[msg.sender] * 100) /
-            totalUSDCTokens;
-        (, , uint256 availableBorrowsBase, , , ) = IPool(AAVEPool)
-            .getUserAccountData(address(this));
-
-        address[] memory path = new address[](2);
-        path[0] = USDCAddress;
-        path[1] = weth;
-
-        uint256[] memory amounts = IUniswapV2Router02(UniswapV2Router02)
-            .getAmountsOut((availableBorrowsBase * percentage) / 100, path);
-
-        return ((amounts[1] * (100 - feePercentage)) / 100);
-    }
-
-    function _deposit(uint256 amount) private {
-        userPositions[msg.sender] += amount;
-        totalUSDCTokens += amount;
-
-        IERC20(USDCAddress).approve(AAVEPool, amount);
-
-        IPool(AAVEPool).supply(USDCAddress, amount, address(this), 0);
-
-        emit Deposit(amount);
     }
 
     fallback() external payable {}
