@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@aave/core-v3/contracts/interfaces/IPool.sol";
 
+//custom errors
 error DepositIsLessThanMinDeposit();
 error InsufficientBalance();
 error InEmergency();
@@ -144,6 +145,7 @@ contract Strategy is ReentrancyGuard {
         payable
         nonReentrant
     {
+        // call internal withdraw method
         _withdraw(tokens, minEth, msg.sender);
     }
 
@@ -153,6 +155,7 @@ contract Strategy is ReentrancyGuard {
         uint256 minEth,
         address to
     ) public payable nonReentrant {
+        // call internal withdraw method
         _withdraw(tokens, minEth, to);
     }
 
