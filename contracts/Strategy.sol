@@ -242,6 +242,7 @@ contract Strategy is ReentrancyGuard {
 
         //transfer fee to admin
         payable(admin).transfer(fee);
+        //transfer amount to user
         payable(to).transfer(withdrawAmount);
 
         emit Withdraw(withdrawAmount);
