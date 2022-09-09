@@ -67,7 +67,9 @@ contract Strategy is ReentrancyGuard {
     /// @dev 1. get address of WETH
     /// @dev 2. set address of deployer to owner
     constructor(uint256 _minDeposit, uint256 _feePercentage) {
+        //get address of WETH contract using UNISWAP ROUTER
         weth = IUniswapV2Router02(UniswapV2Router02).WETH();
+        //init storage variables
         minDeposit = _minDeposit;
         feePercentage = _feePercentage;
         admin = msg.sender;
@@ -79,10 +81,12 @@ contract Strategy is ReentrancyGuard {
     function deposit() public payable notInEmergency {
         if (msg.value < minDeposit) revert DepositIsLessThanMinDeposit();
 
+        //construct path of deposit
         address[] memory path = new address[](2);
         path[0] = weth;
         path[1] = USDCAddress;
 
+        //swap ETH (deposit by user) to USDC (stable coin) at UNISWAP (DEX)
         uint256[] memory amounts = IUniswapV2Router02(UniswapV2Router02)
             .swapExactETHForTokens{value: msg.value}(
             1 wei,
@@ -105,8 +109,10 @@ contract Strategy is ReentrancyGuard {
             wethTokens
         );
 
+        //check result of transferFrom method
         if (!sent) revert TransferFailed();
 
+        //construct path of deposit
         address[] memory path = new address[](2);
         path[0] = weth;
         path[1] = USDCAddress;
