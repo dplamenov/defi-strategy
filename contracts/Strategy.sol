@@ -27,7 +27,7 @@ contract Strategy is ReentrancyGuard {
     uint256 public feePercentage;
     uint256 public totalUSDCTokens;
 
-    bool emergency = false;
+    bool public emergency = false;
 
     mapping(address => uint256) public userPositions;
 
