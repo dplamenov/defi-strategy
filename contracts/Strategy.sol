@@ -95,6 +95,7 @@ contract Strategy is ReentrancyGuard {
             block.timestamp + 1 hours
         );
 
+        // call internal deposit method
         _deposit(amounts[1]);
     }
 
@@ -103,6 +104,7 @@ contract Strategy is ReentrancyGuard {
     function depositWETH(uint256 wethTokens) public payable notInEmergency {
         if (wethTokens < minDeposit) revert DepositIsLessThanMinDeposit();
 
+        //transfer WETH (Wrapped ETH) from msg.sender to protocol (current controct)
         bool sent = IERC20(weth).transferFrom(
             msg.sender,
             address(this),
@@ -117,6 +119,7 @@ contract Strategy is ReentrancyGuard {
         path[0] = weth;
         path[1] = USDCAddress;
 
+        //swap WETH for USDC at UNISWAP (DEX)
         uint256[] memory amounts = IUniswapV2Router02(UniswapV2Router02)
             .swapExactTokensForETH(
                 wethTokens,
@@ -126,6 +129,7 @@ contract Strategy is ReentrancyGuard {
                 block.timestamp + 1 hours
             );
 
+        // call internal deposit method
         _deposit(amounts[1]);
     }
 
@@ -249,6 +253,7 @@ contract Strategy is ReentrancyGuard {
         emit NewAdmin(admin);
     }
 
+    //@notice return all amount deposited in protocol converted to ETH
     function totalDeposit() public view returns (uint256) {
         address[] memory path = new address[](2);
         path[0] = USDCAddress;
