@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
 import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
@@ -191,7 +191,7 @@ contract Strategy is ReentrancyGuard {
     }
 
     /// @notice internal method for deposit
-    function _deposit(uint256 amount) private {
+    function _deposit(uint256 amount) internal {
         userPositions[msg.sender] += amount;
         totalUSDCTokens += amount;
 
@@ -209,7 +209,7 @@ contract Strategy is ReentrancyGuard {
         uint256 tokens,
         uint256 minEth,
         address to
-    ) private {
+    ) internal {
         if (userPositions[msg.sender] < tokens) revert InsufficientBalance();
 
         address[] memory path = new address[](2);
