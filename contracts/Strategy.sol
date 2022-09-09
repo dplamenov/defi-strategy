@@ -11,6 +11,7 @@ error InsufficientBalance();
 error InEmergency();
 error NotAdmin();
 error TransferFailed();
+error NotProposalAdmin();
 
 contract Strategy is ReentrancyGuard {
     address public immutable UniswapV2Router02 =
@@ -21,6 +22,7 @@ contract Strategy is ReentrancyGuard {
         0x368EedF3f56ad10b9bC57eed4Dac65B26Bb667f6;
     address public weth;
     address public admin;
+    address public proposalAdminAddress;
     uint256 public minDeposit;
     uint256 public feePercentage;
     uint256 public totalUSDCTokens;
@@ -35,6 +37,10 @@ contract Strategy is ReentrancyGuard {
     /// @notice emit ot withdraw
     event Withdraw(uint256 amount);
 
+    event NewProposalAdmin(address proposalAdmin);
+
+    event NewAdmin(address admin);
+
     /// @notice emergency must be false to pass check
     modifier notInEmergency() {
         if (emergency == true) revert InEmergency();
@@ -44,6 +50,11 @@ contract Strategy is ReentrancyGuard {
     /// @notice msg.sender must be equal to admin to pass check
     modifier onlyAdmin() {
         if (msg.sender != admin) revert NotAdmin();
+        _;
+    }
+
+    modifier onlyProposalAdmin() {
+        if (msg.sender != proposalAdminAddress) revert NotProposalAdmin();
         _;
     }
 
@@ -207,10 +218,21 @@ contract Strategy is ReentrancyGuard {
         uint256 fee = (amounts[1] * feePercentage) / 100;
         uint256 withdrawAmount = amounts[1] - fee;
 
-        payable(owner).transfer(fee);
+        payable(admin).transfer(fee);
         payable(to).transfer(withdrawAmount);
 
         emit Withdraw(withdrawAmount);
+    }
+
+    function proposalAdmin(address _proposalAdminAddress) public onlyAdmin {
+        proposalAdminAddress = _proposalAdminAddress;
+        emit NewProposalAdmin(_proposalAdminAddress);
+    }
+
+    function claimAdmin() public onlyProposalAdmin {
+        admin = msg.sender;
+        proposalAdminAddress = address(0);
+        emit NewAdmin(admin);
     }
 
     fallback() external payable {}
