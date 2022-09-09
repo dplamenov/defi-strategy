@@ -37,8 +37,10 @@ contract Strategy is ReentrancyGuard {
     /// @notice emit on withdraw
     event Withdraw(uint256 amount);
 
+    /// @notice emit when new admin propose new admin
     event NewProposalAdmin(address proposalAdmin);
 
+    /// @notice emit when protocal has new admin
     event NewAdmin(address admin);
 
     /// @notice emergency must be false to pass check
@@ -53,6 +55,7 @@ contract Strategy is ReentrancyGuard {
         _;
     }
 
+    /// @notice msg.sender must be equal to proposal admin to pass check
     modifier onlyProposalAdmin() {
         if (msg.sender != proposalAdminAddress) revert NotProposalAdmin();
         _;
@@ -157,6 +160,7 @@ contract Strategy is ReentrancyGuard {
         emergency = false;
     }
 
+    /// @notice Estimate how many ETH user will recieve if withdraw all tokens amount
     function estimateWithdraw() public view returns (uint256) {
         uint256 percentage = (userPositions[msg.sender] * 100) /
             totalUSDCTokens;
@@ -173,6 +177,7 @@ contract Strategy is ReentrancyGuard {
         return ((amounts[1] * (100 - feePercentage)) / 100);
     }
 
+    /// @notice internal method for deposit
     function _deposit(uint256 amount) private {
         userPositions[msg.sender] += amount;
         totalUSDCTokens += amount;
@@ -184,6 +189,7 @@ contract Strategy is ReentrancyGuard {
         emit Deposit(amount);
     }
 
+    /// @notice internal method for withdraw
     function _withdraw(
         uint256 tokens,
         uint256 minEth,
@@ -224,11 +230,13 @@ contract Strategy is ReentrancyGuard {
         emit Withdraw(withdrawAmount);
     }
 
+    /// @notice current admin can propose new admin
     function proposalAdmin(address _proposalAdminAddress) public onlyAdmin {
         proposalAdminAddress = _proposalAdminAddress;
         emit NewProposalAdmin(_proposalAdminAddress);
     }
 
+    /// @notice proposed admin must claim admin role using this method
     function claimAdmin() public onlyProposalAdmin {
         admin = msg.sender;
         proposalAdminAddress = address(0);
