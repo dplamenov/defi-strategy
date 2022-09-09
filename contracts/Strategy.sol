@@ -192,8 +192,10 @@ contract Strategy is ReentrancyGuard {
         userPositions[msg.sender] += amount;
         totalUSDCTokens += amount;
 
+        //approve AAVE to spend USDC
         IERC20(USDCAddress).approve(AAVEPool, amount);
 
+        //supply AAVE with USDC
         IPool(AAVEPool).supply(USDCAddress, amount, address(this), 0);
 
         emit Deposit(amount);
@@ -214,6 +216,7 @@ contract Strategy is ReentrancyGuard {
         userPositions[msg.sender] -= tokens;
         totalUSDCTokens -= tokens;
 
+        //withdraw tokens from AAVE
         uint256 tokens = IPool(AAVEPool).withdraw(
             USDCAddress,
             tokens,
@@ -234,6 +237,7 @@ contract Strategy is ReentrancyGuard {
         uint256 fee = (amounts[1] * feePercentage) / 100;
         uint256 withdrawAmount = amounts[1] - fee;
 
+        //transfer fee to admin
         payable(admin).transfer(fee);
         payable(to).transfer(withdrawAmount);
 
