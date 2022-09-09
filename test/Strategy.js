@@ -18,7 +18,7 @@ describe("Strategy contract", function () {
     const [owner] = await ethers.getSigners();
     expect(await strategy.minDeposit()).to.be.eq(100);
     expect(await strategy.feePercentage()).to.be.eq(1);
-    expect(await strategy.owner()).to.be.eq(owner.address);
+    expect(await strategy.admin()).to.be.eq(owner.address);
   });
 
   describe("Deposit ETH method", function () {
