@@ -20,7 +20,7 @@ contract Strategy is ReentrancyGuard {
     address public immutable AAVEPool =
         0x368EedF3f56ad10b9bC57eed4Dac65B26Bb667f6;
     address public weth;
-    address public owner;
+    address public admin;
     uint256 public minDeposit;
     uint256 public feePercentage;
     uint256 public totalUSDCTokens;
@@ -43,7 +43,7 @@ contract Strategy is ReentrancyGuard {
 
     /// @notice msg.sender must be equal to admin to pass check
     modifier onlyAdmin() {
-        if (msg.sender != owner) revert NotAdmin();
+        if (msg.sender != admin) revert NotAdmin();
         _;
     }
 
@@ -56,7 +56,7 @@ contract Strategy is ReentrancyGuard {
         weth = IUniswapV2Router02(UniswapV2Router02).WETH();
         minDeposit = _minDeposit;
         feePercentage = _feePercentage;
-        owner = msg.sender;
+        admin = msg.sender;
     }
 
     /// @notice deposit -> User can deposit ETH; Deposit should be more than minDeposit; Avaible only in normal mode(notInEmergency)
