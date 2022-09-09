@@ -31,10 +31,10 @@ contract Strategy is ReentrancyGuard {
 
     mapping(address => uint256) public userPositions;
 
-    /// @notice emit ot deposit
+    /// @notice emit on deposit
     event Deposit(uint256 amount);
 
-    /// @notice emit ot withdraw
+    /// @notice emit on withdraw
     event Withdraw(uint256 amount);
 
     event NewProposalAdmin(address proposalAdmin);
