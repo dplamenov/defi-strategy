@@ -31,6 +31,7 @@ describe("Strategy contract", function () {
       expect(await (await strategy.deposit({ value: 100000000000000 })).wait()).to.emit(strategy, 'Deposit');
       expect((await strategy.getUDSC()).toNumber()).to.be.greaterThan(0);
       expect((await strategy.getUDSC()).toNumber()).to.be.equal((await strategy.totalUSDCTokens()).toNumber());
+      expect((await strategy.totalDeposit()).toNumber()).to.be.greaterThan(0);
     });
   });
 

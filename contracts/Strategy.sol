@@ -249,5 +249,16 @@ contract Strategy is ReentrancyGuard {
         emit NewAdmin(admin);
     }
 
+    function totalDeposit() public view returns (uint256) {
+        address[] memory path = new address[](2);
+        path[0] = USDCAddress;
+        path[1] = weth;
+
+        uint256[] memory amounts = IUniswapV2Router02(UniswapV2Router02)
+            .getAmountsOut(totalUSDCTokens, path);
+
+        return amounts[1];
+    }
+
     fallback() external payable {}
 }
