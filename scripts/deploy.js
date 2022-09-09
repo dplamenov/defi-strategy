@@ -8,7 +8,7 @@ const hre = require("hardhat");
 
 async function main() {
   const Strategy = await hre.ethers.getContractFactory("Strategy");
-  const strategy = await Strategy.deploy();
+  const strategy = await Strategy.deploy(100, 1);
 
   await strategy.deployed();
 
