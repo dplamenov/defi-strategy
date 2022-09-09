@@ -13,9 +13,12 @@ error NotAdmin();
 error TransferFailed();
 
 contract Strategy is ReentrancyGuard {
-    address UniswapV2Router02 = 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D;
-    address USDCAddress = 0xA2025B15a1757311bfD68cb14eaeFCc237AF5b43;
-    address AAVEPool = 0x368EedF3f56ad10b9bC57eed4Dac65B26Bb667f6;
+    address public immutable UniswapV2Router02 =
+        0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D;
+    address public immutable USDCAddress =
+        0xA2025B15a1757311bfD68cb14eaeFCc237AF5b43;
+    address public immutable AAVEPool =
+        0x368EedF3f56ad10b9bC57eed4Dac65B26Bb667f6;
     address public weth;
     address public owner;
     uint256 public minDeposit;
