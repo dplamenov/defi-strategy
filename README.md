@@ -1,8 +1,7 @@
 # DeFi Strategy
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a script that deploys that contract.
-
-Try running some of the following tasks:
+1. User deposit ETH or WETH (Wrapped ETH) in protocol
+2. Protocol swap deposited ETH or WETH at UNISWAP (DEX)
 
 ```shell
 npx hardhat help
