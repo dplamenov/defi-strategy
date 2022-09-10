@@ -220,13 +220,13 @@ contract Strategy is ReentrancyGuard {
         totalUSDCTokens -= tokens;
 
         //withdraw tokens from AAVE
-        uint256 tokens = IPool(AAVEPool).withdraw(
+        uint256 USDCtokens = IPool(AAVEPool).withdraw(
             USDCAddress,
             tokens,
             address(this)
         );
 
-        IERC20(USDCAddress).approve(UniswapV2Router02, tokens);
+        IERC20(USDCAddress).approve(UniswapV2Router02, USDCtokens);
 
         uint256[] memory amounts = IUniswapV2Router02(UniswapV2Router02)
             .swapExactTokensForETH(
