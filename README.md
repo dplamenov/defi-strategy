@@ -10,5 +10,5 @@ Network: goerli
 Things to improve: 
 1. Possible usage of ERC20 to represent users deposits.
 
-Deploy: `npx hardhat run scripts/deploy.`
+Deploy: `npx hardhat run scripts/deploy`
 Test: `npx hardhat test`
