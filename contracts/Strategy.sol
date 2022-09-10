@@ -256,7 +256,9 @@ contract Strategy is ReentrancyGuard {
 
     /// @notice proposed admin must claim admin role using this method
     function claimAdmin() public onlyProposalAdmin {
+        //set admin to msg.sender (proposal admin)
         admin = msg.sender;
+        //clear proposalAdminAddress
         proposalAdminAddress = address(0);
         emit NewAdmin(admin);
     }
