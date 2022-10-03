@@ -24,9 +24,9 @@ contract Strategy is ReentrancyGuard {
     address public weth;
     address public admin;
     address public proposalAdminAddress;
-    uint256 public minDeposit;
-    uint256 public feePercentage;
     uint256 public totalUSDCTokens;
+    uint256 public immutable minDeposit;
+    uint256 public immutable feePercentage;
 
     bool public emergency = false;
 
