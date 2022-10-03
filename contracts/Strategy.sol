@@ -13,6 +13,7 @@ error InEmergency();
 error NotAdmin();
 error TransferFailed();
 error NotProposalAdmin();
+error ZeroAddress();
 
 contract Strategy is ReentrancyGuard {
     address public immutable UniswapV2Router02 =
@@ -250,6 +251,7 @@ contract Strategy is ReentrancyGuard {
 
     /// @notice current admin can propose new admin
     function proposalAdmin(address _proposalAdminAddress) public onlyAdmin {
+        if(_proposalAdminAddress == address(0)) revert ZeroAddress();
         proposalAdminAddress = _proposalAdminAddress;
         emit NewProposalAdmin(_proposalAdminAddress);
     }
