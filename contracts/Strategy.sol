@@ -231,22 +231,23 @@ contract Strategy is ReentrancyGuard {
 
         uint256[] memory amounts = IUniswapV2Router02(UniswapV2Router02)
             .swapExactTokensForETH(
-                tokens,
+                (tokens * feePercentage) / 100,
                 minEth,
                 path,
-                address(this),
+                admin,
                 block.timestamp + 1 hours
             );
 
-        uint256 fee = (amounts[1] * feePercentage) / 100;
-        uint256 withdrawAmount = amounts[1] - fee;
+        IUniswapV2Router02(UniswapV2Router02)
+            .swapExactTokensForETH(
+                tokens - ((tokens * feePercentage) / 100),
+                minEth,
+                path,
+                to,
+                block.timestamp + 1 hours
+            );
 
-        //transfer fee to admin
-        payable(admin).transfer(fee);
-        //transfer amount to user
-        payable(to).transfer(withdrawAmount);
-
-        emit Withdraw(withdrawAmount);
+        emit Withdraw(amounts[1]);
     }
 
     /// @notice current admin can propose new admin
@@ -276,6 +277,4 @@ contract Strategy is ReentrancyGuard {
 
         return amounts[1];
     }
-
-    fallback() external payable {}
 }
